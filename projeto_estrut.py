@@ -24,25 +24,33 @@ class Site_atual:
 
 class Navegador:
   def __init__(self):
-    self.topo = None #URL inicial, começa vazia, logicamente
-    self.contador = 0 #apenas simbólico pra contar qnts URL's foram acessadas
+    self.__topo = None #URL inicial, começa vazia, logicamente
+    self.__contador = 0 #apenas simbólico pra contar qnts URL's foram acessadas
 
   def is_empty(self):
-     return self.topo is None
+     return self.__topo is None
+
+  @property
+  def topo(self):
+      return self.__topo
+
+  @property
+  def contador(self):
+      return self.__contador
 
   def push(self, elemento): #vai adicionar urls no topo da
      site = Site_atual(elemento)
      site.prox = self.topo
-     self.topo = site
-     self.contador += 1
+     self.__topo = site
+     self.__contador += 1
 
   def pop(self): #vai excluir o ultimo URL, o atual no caso.
   #Esse é o método que tem que ligar em uma função para usar o #back
-    assert self.topo != None, "Nenhuma página anterior"
-    self.topo = self.topo.prox #transforma a URL atual na anterior a ela
-    self.contador -= 1
-    if self.topo != None:
-      return self.topo.carga
+    assert self.__topo != None, "Nenhuma página anterior"
+    self.__topo = self.__topo.prox #transforma a URL atual na anterior a ela
+    self.__contador -= 1
+    if self.__topo != None:
+      return self.__topo.carga
     return "Página inicial" #Se não exixtir nenhuma página antes
 
   def encerrar(self): #colocar esse método com a função de #sair
@@ -68,6 +76,12 @@ def criar_arquivo_se_nao_existir(nome_arquivo):
     Verifica se o arquivo existe.
     Se não existir, cria um arquivo vazio.
     """
+    # Certifica-se de que o diretório existe
+    diretorio = os.path.dirname(nome_arquivo)
+    if not os.path.exists(diretorio):
+        os.makedirs(diretorio, exist_ok=True)
+        print(f"Diretório '{diretorio}' criado.")
+
     if not os.path.exists(nome_arquivo):
         print(f"Arquivo '{nome_arquivo}' não encontrado. Criando novo arquivo...")
         with open(nome_arquivo, "w", encoding="utf-8") as f:
@@ -178,7 +192,7 @@ def navegacao():
 
   nav = Navegador()
 
-  print("\n============= GUIZINBROWSER2000 =============")
+  print("\n============= GUIZINBROWSER2000 ============")
   print("Comandos:")
   print(" • Digite qualquer URL válida para acessar")
   print(" • #back  → voltar para página anterior")
@@ -186,45 +200,45 @@ def navegacao():
   print(" • #sair  → encerrar navegação")
   print("==============================================\n")
 
-  while True:  
+  while True:
       exibir_browser(nav)
 
       comando = input("Digite uma URL ou comando (#back, #add, #sair): ")
 
       if comando == "#back":
-      
+
         retornar_pagina(nav)
 
       elif comando.startswith("#add"):
-      
+
         partes = comando.split()
-      
+
         if len(partes) < 2:
-      
+
               print("> Uso correto: #add https://exemplo.com")
-      
+
         else:
-      
+
             salvar_url_no_arquivo(caminho, partes[1])
 
       elif comando == "#sair":
-      
+
         print(nav.encerrar())
-      
+
         break
 
       else:
-      
+
           # acessar uma URL
-      
+
         if verifica_url(comando):
-      
+
             nav.push(comando)
-      
+
             print(f"> Acessando: {comando}")
-      
+
         else:
-      
+
             print("> Esta URL é inválida. Não foi acessada.")
 
 # ATIVA o navegador
