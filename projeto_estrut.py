@@ -48,42 +48,11 @@ class Navegador:
   def encerrar(self): #colocar esse método com a função de #sair
     return 'NAVEGAÇÃO ENCERRADA!'
 
-#=-=-=-=-=-=-=-=-==-=
 """
 ==================================================================================
-                              FUNÇÕES DO BROWSER
+                          GERENCIAMENTO DAS URLs
 ==================================================================================
 """
-
-def retornar_pagina(nav): #Função do #back
-  try:
-    nova_pagina = nav.pop() #vai
-    print(f'retornando para {nova_pagina}')
-    return nova_pagina
-  except AssertionError:
-    print('Não há página anterior')
-    return None
-
-def navegacao(): #Esqueleto da função de navegação, ainda tá muito lisa
-  nav = Navegador()
-
-  while True:
-    comando = input('Digite uma URL, #back ou #sair: ')
-
-    if comando == '#back':
-      retornar_pagina(nav)
-    elif comando == '#sair':
-      print(nav.encerrar())
-      break
-    else:
-      nav.push(comando)
-      print(f'Acessando: {comando}')
-
-if __name__ == "__main__": # Pra fazer rodar
-    navegacao()
-
-
-#-=-=-==-=-=-===-=-=-=-=-=-=-===-=-=-
 
 
 # =============== 1. MONTAR O GOOGLE DRIVE ====================
@@ -123,7 +92,7 @@ def verifica_url(url):
   try:
     resultado = urlparse(url)
     if resultado.scheme and resultado.netloc:
-        return 'Url válida...'
+        return 'Url válida.'
     else:
         return 'Url inválida.'
 
@@ -153,8 +122,6 @@ def salvar_url_no_arquivo(nome_arquivo, url):
     else:
         print(f"A URL '{url}' já está cadastrada! ")
 
-
-
 # =============== 5. EXIBIR TODAS AS URLs =========================
 def mostrar_urls(nome_arquivo):
     """
@@ -169,20 +136,6 @@ def mostrar_urls(nome_arquivo):
             print(conteudo)
     print("====================================\n")
 
-
-# ===== EXECUÇÃO DO PROGRAMA (TESTE SIMPLES) =====
-
-criar_arquivo_se_nao_existir(caminho)
-
-salvar_url_no_arquivo(caminho, "https://www.google.com")
-salvar_url_no_arquivo(caminho, "https://www.openai.com")
-salvar_url_no_arquivo(caminho, "https://www.google.com")  # Teste de duplicação
-salvar_url_no_arquivo(caminho, "www.google.com")
-salvar_url_no_arquivo(caminho, "https:/.com")
-
-
-mostrar_urls(caminho)
-
 def limpar_arquivo(nome_arquivo):
     """
     Apaga TUDO que tem no arquivo, deixando ele vazio.
@@ -191,6 +144,88 @@ def limpar_arquivo(nome_arquivo):
         pass  # não escreve nada = limpa
     print("Todas as URLs foram apagadas!")
 
-# USO:
-limpar_arquivo(caminho)
+"""
+==================================================================================
+                        INTERFACE DO GUIZINBROWSER
+==================================================================================
+"""
+def exibir_browser(nav):
+  print('======================================')
+  print('PÁGINA ATUAL:')
+  if nav.topo:
+    print(' ->', nav.topo.carga)
+  else:
+    print(' -> Página inicial')
+  print('\n HISTÓRICO: ')
+  temp = nav.topo
+  pos = 1
+  while temp:
+    print(f'  {pos}. {temp.carga}')
+    temp = temp.prox
+    pos += 1
 
+def retornar_pagina(nav): #Função do #back
+  try:
+    nova_pagina = nav.pop() #vai
+    print(f'retornando para {nova_pagina}')
+    return nova_pagina
+  except AssertionError:
+    print('Não há página anterior')
+    return None
+
+def navegacao():
+  criar_arquivo_se_nao_existir(caminho)
+
+  nav = Navegador()
+
+  print("\n============= GUIZINBROWSER2000 =============")
+  print("Comandos:")
+  print(" • Digite qualquer URL válida para acessar")
+  print(" • #back  → voltar para página anterior")
+  print(" • #add <url> → cadastrar URL válida")
+  print(" • #sair  → encerrar navegação")
+  print("==============================================\n")
+
+  while True:  
+      exibir_browser(nav)
+
+      comando = input("Digite uma URL ou comando (#back, #add, #sair): ")
+
+      if comando == "#back":
+      
+        retornar_pagina(nav)
+
+      elif comando.startswith("#add"):
+      
+        partes = comando.split()
+      
+        if len(partes) < 2:
+      
+              print("> Uso correto: #add https://exemplo.com")
+      
+        else:
+      
+            salvar_url_no_arquivo(caminho, partes[1])
+
+      elif comando == "#sair":
+      
+        print(nav.encerrar())
+      
+        break
+
+      else:
+      
+          # acessar uma URL
+      
+        if verifica_url(comando):
+      
+            nav.push(comando)
+      
+            print(f"> Acessando: {comando}")
+      
+        else:
+      
+            print("> Esta URL é inválida. Não foi acessada.")
+
+# ATIVA o navegador
+navegacao()
