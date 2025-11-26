@@ -12,6 +12,10 @@ O QUE JÁ TEMOS:
 BASE DO NAVEGADOR
 FUNÇÃO BACK PRA VOLTAR PRA PÁGINA ANTERIOR
 FUNÇÃO SAIR PRA ENCERRAR A NAVEGAÇÃO
+DOCUMENTO NO DRIVE PRAS URL
+**FALTA SÓ FAZER A VERIFICAÇÃO DAS URL**
+> QUALQUER URL DIGITADA É DADA COMO VÁLIDA, TEM ALGUMA FUNÇÃO, PROVAVELMENTE,
+> QUE TÁ RETORNANDO UMA STRING AO INVÉS DE BOOLEANO
 """
 
 class Site_atual:
@@ -106,12 +110,12 @@ def verifica_url(url):
   try:
     resultado = urlparse(url)
     if resultado.scheme and resultado.netloc:
-        return 'Url válida.'
+        return True
     else:
-        return 'Url inválida.'
+        return False
 
   except:
-    return 'Url inválida.'
+    return False
 
 def salvar_url_no_arquivo(nome_arquivo, url):
 
@@ -125,7 +129,7 @@ def salvar_url_no_arquivo(nome_arquivo, url):
     Salva uma URL nova **apenas se ela NÃO estiver cadastrada**.
     Assim evitamos duplicação no arquivo.
     """
-    if verificacao == 'Url inválida.':
+    if verificacao is False:
       print('Url não será salva...')
 
     elif not url_ja_existe(nome_arquivo, url):
@@ -157,6 +161,17 @@ def limpar_arquivo(nome_arquivo):
     with open(nome_arquivo, "w", encoding="utf-8") as f:
         pass  # não escreve nada = limpa
     print("Todas as URLs foram apagadas!")
+
+def url_valida(nome_arquivo, url):
+    with open(nome_arquivo, "r", encoding="utf-8") as f:
+        conteudo = f.read()
+    if url in conteudo:
+        return True
+    else:
+        return False
+
+    if url == conteudo[i]:
+        return url
 
 """
 ==================================================================================
