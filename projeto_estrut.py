@@ -1,6 +1,6 @@
 import os
 from google.colab import drive
-from urllib.parse import urlparse
+import requests
 
 """
 ==================================================================================
@@ -104,32 +104,26 @@ def url_ja_existe(nome_arquivo, url):
 
 # =============== 4. SALVAR NOVA URL ==============================
 '''
-    Devemos verificar se a url é válida. Para isso, usaremos a biblioteca urllib
+    Devemos verificar se a url é válida. Para isso, usaremos request
     '''
-def verifica_url(url):
-  try:
-    resultado = urlparse(url)
-    if resultado.scheme and resultado.netloc:
-        return True
-    else:
-        return False
-
-  except:
-    return False
+def verifica_url(url, timeout=5):
+    try:
+        r = requests.get(url, timeout=timeout)
+        return True, None # Always return a tuple: (boolean, message or None)
+    except requests.exceptions.RequestException as e:
+        return False, f"Erro: {e}"
 
 def salvar_url_no_arquivo(nome_arquivo, url):
-
-    '''
-    verificando se a url é válida
-    '''
-    verificacao = verifica_url(url)
-    print(verificacao)
 
     """
     Salva uma URL nova **apenas se ela NÃO estiver cadastrada**.
     Assim evitamos duplicação no arquivo.
     """
-    if verificacao is False:
+    '''
+    verificando se a url é válida
+    '''
+    is_valid, _ = verifica_url(url)
+    if not is_valid:
       print('Url não será salva...')
 
     elif not url_ja_existe(nome_arquivo, url):
@@ -163,15 +157,16 @@ def limpar_arquivo(nome_arquivo):
     print("Todas as URLs foram apagadas!")
 
 def url_valida(nome_arquivo, url):
+    """
+    Verifica se a URL está cadastrada no arquivo.
+    Retorna True (está cadastrada) ou False (não está cadastrada).
+    """
     with open(nome_arquivo, "r", encoding="utf-8") as f:
         conteudo = f.read()
     if url in conteudo:
         return True
     else:
         return False
-
-    if url == conteudo[i]:
-        return url
 
 """
 ==================================================================================
@@ -209,10 +204,10 @@ def navegacao():
 
   print("\n============= GUIZINBROWSER2000 ============")
   print("Comandos:")
-  print(" • Digite qualquer URL válida para acessar")
-  print(" • #back  → voltar para página anterior")
-  print(" • #add <url> → cadastrar URL válida")
-  print(" • #sair  → encerrar navegação")
+  print(" \u2022 Digite qualquer URL válida para acessar")
+  print(" \u2022 #back  \u2192 voltar para página anterior")
+  print(" \u2022 #add <url> \u2192 cadastrar URL válida")
+  print(" \u2022 #sair  \u2192 encerrar navegação")
   print("==============================================\n")
 
   while True:
@@ -233,8 +228,12 @@ def navegacao():
               print("> Uso correto: #add https://exemplo.com")
 
         else:
-
-            salvar_url_no_arquivo(caminho, partes[1])
+            #
+            is_valid, _ = verifica_url(partes[1]) # Unpack the tuple
+            if is_valid:
+                salvar_url_no_arquivo(caminho, partes[1])
+            else:
+                print(f"> A URL '{partes[1]}' é inválida. Não foi adicionada ao histórico.")
 
       elif comando == "#sair":
 
@@ -245,9 +244,8 @@ def navegacao():
       else:
 
           # acessar uma URL
-
-        if verifica_url(comando):
-
+        is_valid, _ = verifica_url(comando)
+        if is_valid:
             nav.push(comando)
 
             print(f"> Acessando: {comando}")
