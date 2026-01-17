@@ -8,14 +8,8 @@ import requests
 ==================================================================================
 """
 """
-O QUE JÁ TEMOS:
-BASE DO NAVEGADOR
-FUNÇÃO BACK PRA VOLTAR PRA PÁGINA ANTERIOR
-FUNÇÃO SAIR PRA ENCERRAR A NAVEGAÇÃO
-DOCUMENTO NO DRIVE PRAS URL
-**FALTA SÓ FAZER A VERIFICAÇÃO DAS URL**
-> QUALQUER URL DIGITADA É DADA COMO VÁLIDA, TEM ALGUMA FUNÇÃO, PROVAVELMENTE,
-> QUE TÁ RETORNANDO UMA STRING AO INVÉS DE BOOLEANO
+O QUE FALTA FAZER:
+
 """
 
 class Site_atual:
@@ -102,10 +96,16 @@ def url_ja_existe(nome_arquivo, url):
         return url + "\n" in f.readlines()  # evita erro com palavras parecidas
 
 
-# =============== 4. SALVAR NOVA URL ==============================
-'''
-    Devemos verificar se a url é válida. Para isso, usaremos request
-    '''
+# =============== 4. VALIDAÇÃO E FORMATAÇÃO DE URL ==============================
+def formatar_url(url):
+    """
+    Recebe uma URL e verifica se começa com http:// ou https://.
+    Se não começar, adiciona https:// por padrão.
+    """
+    if not url.startswith("http://") and not url.startswith("https://"):
+        return f"https://{url}"
+    return url
+
 def verifica_url(url, timeout=5):
     try:
         r = requests.get(url, timeout=timeout)
@@ -122,6 +122,7 @@ def salvar_url_no_arquivo(nome_arquivo, url):
     '''
     verificando se a url é válida
     '''
+    # A URL já chega formatada aqui se vier do #add, mas garantimos validação
     is_valid, _ = verifica_url(url)
     if not is_valid:
       print('Url não será salva...')
@@ -259,12 +260,13 @@ def navegacao():
               print("> Uso correto: #add https://exemplo.com")
 
         else:
-            #
-            is_valid, _ = verifica_url(partes[1]) # Unpack the tuple
+            # Formatamos a URL antes de verificar
+            url_formatada = formatar_url(partes[1])
+            is_valid, _ = verifica_url(url_formatada)
             if is_valid:
-                salvar_url_no_arquivo(caminho, partes[1])
+                salvar_url_no_arquivo(caminho, url_formatada)
             else:
-                print(f"> A URL '{partes[1]}' é inválida. Não foi adicionada ao histórico.")
+                print(f"> A URL '{partes[1]}' (tentamos '{url_formatada}') é inválida. Não foi adicionada ao histórico.")
 
       elif comando == "#sair":
 
@@ -275,15 +277,16 @@ def navegacao():
       else:
 
           # acessar uma URL
-        is_valid, _ = verifica_url(comando)
+        url_formatada = formatar_url(comando)
+        is_valid, _ = verifica_url(url_formatada)
         if is_valid:
-            nav.push(comando)
+            nav.push(url_formatada)
 
-            print(f"> Acessando: {comando}")
+            print(f"> Acessando: {url_formatada}")
 
         else:
 
-            print("> Esta URL é inválida. Não foi acessada.")
+            print(f"> Esta URL é inválida ('{url_formatada}'). Não foi acessada.")
 
 # ATIVA o navegador
 navegacao()
