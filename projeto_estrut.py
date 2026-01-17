@@ -167,6 +167,36 @@ def url_valida(nome_arquivo, url):
         return True
     else:
         return False
+"""
+==================================================================================
+                        COMANDOS DISPONÍVEIS DO SISTEMA
+==================================================================================
+"""
+
+COMANDOS = {
+    "#help": "Exibe esta mensagem de ajuda com todos os comandos disponíveis.",
+    "#back": "Retorna para a página anterior utilizando a pilha.",
+    "#add <url>": "Cadastra uma URL válida no arquivo do Google Drive.",
+    "#sair": "Encerra a navegação e finaliza o programa."
+}
+
+
+
+
+def comando_help():
+    """
+    Exibe a ajuda do sistema.
+    Mostra todos os comandos iniciados por '#' e explica
+    de forma simples a função de cada um.
+    """
+    print("\n=========== AJUDA DO GUIZINBROWSER2000 ===========\n")
+
+    for comando, descricao in COMANDOS.items():
+        print(f"{comando}")
+        print(f"  -> {descricao}\n")
+
+    print("Digite uma URL válida para acessar uma nova página.")
+    print("=================================================\n")
 
 """
 ==================================================================================
@@ -205,17 +235,18 @@ def navegacao():
   print("\n============= GUIZINBROWSER2000 ============")
   print("Comandos:")
   print(" \u2022 Digite qualquer URL válida para acessar")
-  print(" \u2022 #back  \u2192 voltar para página anterior")
-  print(" \u2022 #add <url> \u2192 cadastrar URL válida")
-  print(" \u2022 #sair  \u2192 encerrar navegação")
+  print(" \u2022 #help  \u2192 para ver os comandos disponíveis")
   print("==============================================\n")
 
   while True:
       exibir_browser(nav)
 
-      comando = input("Digite uma URL ou comando (#back, #add, #sair): ")
+      comando = input("Digite uma URL ou comando: ")
 
-      if comando == "#back":
+      if comando == "#help":
+          comando_help()
+
+      elif comando == "#back":
 
         retornar_pagina(nav)
 
